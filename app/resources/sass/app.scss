@@ -1,0 +1,65 @@
+// Fonts
+@import url('https://fonts.googleapis.com/css?family=Nunito');
+
+// Variables
+@import 'variables';
+
+// Bootstrap
+@import '~bootstrap/scss/bootstrap';
+
+// This file contains the main styles for the application, written in Sass.
+
+$primary-color: #4CAF50;
+$secondary-color: #f44336;
+$background-color: #f4f4f4;
+$text-color: #333;
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: $background-color;
+    color: $text-color;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: $primary-color;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+}
+
+.kanban-board {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+.column {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: 30%;
+    padding: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.column h2 {
+    background-color: $secondary-color;
+    color: white;
+    padding: 10px;
+    border-radius: 5px 5px 0 0;
+}
+
+.card {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    margin: 10px 0;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.card:hover {
+    background-color: #f9f9f9;
+}
