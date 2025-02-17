@@ -5,7 +5,7 @@ services:
       dockerfile: docker/app/Dockerfile
     ports:
       - "8000:80"  # 本番用のApacheポート（公開）
-      - "3000:3000"  # 開発用のReactホットリロード（開発用に制限）
+      # - "3000:3000"  # 開発用のReactホットリロード（開発用に制限）
     volumes:
       - ./app:/var/www/html
       - ./docker/app/apache/apache.conf:/etc/apache2/sites-available/000-default.conf

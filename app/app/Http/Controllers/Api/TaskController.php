@@ -4,45 +4,27 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Task;
+use App\Models\Status;
+use Illuminate\Support\Facades\Log;
 
 class TaskController extends Controller
 {
     public function index()
     {
-        try{
-        $tasks = Task::all()->groupBy('status');
-
-        return response()->json([
-            'columns' => [
-                'todo' => [
-                    'name' => 'To Do',
-                    'items' => $tasks['todo'] ?? [],
-                ],
-                'inProgress' => [
-                    'name' => 'In Progress',
-                    'items' => $tasks['inProgress'] ?? [],
-                ],
-                'done' => [
-                    'name' => 'Done',
-                    'items' => $tasks['done'] ?? [],
-                ],
-            ]
-        ]);
-    } catch (\Exception $e) {
-        return response()->json(['error' => 'Server error: ' . $e->getMessage()], 500);
-    }
+        $tasks = Task::with('status')->get();
+        return response()->json($tasks);
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'content' => 'required|string',
-            'status' => 'string|in:todo,in_progress,done'
+            'content' => 'required|string|max:255',
+            'status_id' => 'required|exists:statuses,id'
         ]);
 
         $task = Task::create([
             'content' => $request->content,
-            'status' => $request->status ?? 'todo'
+            'status_id' => $request->status_id
         ]);
 
         return response()->json($task, 201);
@@ -50,15 +32,18 @@ class TaskController extends Controller
 
     public function update(Request $request, $id)
     {
+        // タスクIDを使って、タスクをデータベースから取得
+        $task = Task::findOrFail($id); // タスクが見つからなければ404を返す
+    
         $request->validate([
-            'status' => 'required|string|in:todo,in_progress,done',
+            'status_id' => 'required|exists:statuses,id'
         ]);
-
-        $task = Task::findOrFail($id);
-        $task->status = $request->status;
-        $task->save();
-
-        return response()->json(['message' => 'Task updated successfully', 'task' => $task]);
-    }
-
+    
+        $task->update([
+            'status_id' => $request->status_id
+        ]);
+    
+        return response()->json($task);
+    }    
+    
 }

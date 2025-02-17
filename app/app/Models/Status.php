@@ -1,17 +1,18 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Task extends Model
+class Status extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['content', 'status_id'];
+    protected $fillable = ['name'];
 
-    public function status()
+    public function tasks()
     {
-        return $this->belongsTo(Status::class);
+        return $this->hasMany(Task::class);
     }
 }

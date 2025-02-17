@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\TaskController;
+use App\Http\Controllers\StatusController;
 
 // Route::group(['prefix' => '/tasks', 'as' => 'tasks.'], function () {
 //     Route::get('/', [TaskController::class, 'list']);
@@ -18,3 +19,6 @@ use App\Http\Controllers\Api\TaskController;
 Route::get('tasks', [TaskController::class, 'index']);
 Route::post('/tasks', [TaskController::class, 'store']);
 Route::patch('/tasks/{id}', [TaskController::class, 'update']);
+
+Route::get('/statuses', [StatusController::class, 'index']);
+Route::post('/statuses', [StatusController::class, 'store']);

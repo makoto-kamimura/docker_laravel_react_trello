@@ -5,6 +5,8 @@ import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautif
 interface Task {
     id: string;
     content: string;
+    status_id: string; // ← 追加
+    status: { id: string, name: string }; // ← ステータス情報をオブジェクトとして持つ
 }
 
 interface Column {
@@ -19,13 +21,38 @@ interface Columns {
 function KanbanBoard() {
     const [columns, setColumns] = useState<Columns>({});
     const [newTask, setNewTask] = useState("");
+    const [newStatus, setNewStatus] = useState("");
 
     useEffect(() => {
-        fetch('/api/tasks')
-            .then(response => response.json())
-            .then(data => setColumns(data.columns))
-            .catch(error => console.error('Error fetching tasks:', error));
+        Promise.all([
+            fetch('/api/tasks').then(response => response.json()),
+            fetch('/api/statuses').then(response => response.json())
+        ])
+        .then(([tasksData, statusesData]) => {
+            console.log("Tasks:", tasksData);
+            console.log("Statuses:", statusesData);
+    
+            const statusMap = statusesData.reduce((acc: { [key: string]: string }, status: { id: string, name: string }) => {
+                acc[status.id] = status.name;
+                return acc;
+            }, {});
+    
+            console.log("Status Map:", statusMap);
+    
+            const initialColumns: Columns = {};
+            statusesData.forEach((status: { id: string, name: string }) => {
+                initialColumns[status.id] = {
+                    name: status.name,
+                    items: tasksData.filter((task: Task) => String(task.status_id) === String(status.id))
+                };
+            });
+    
+            console.log("Initial Columns:", initialColumns);
+            setColumns(initialColumns);
+        })
+        .catch(error => console.error('Error fetching data:', error));
     }, []);
+    
 
     const onDragEnd = (result: DropResult) => {
         if (!result.destination) return;
@@ -42,6 +69,8 @@ function KanbanBoard() {
             const destItems = [...destColumn.items];
     
             const [movedItem] = sourceItems.splice(source.index, 1);
+            movedItem.status = { id: destination.droppableId, name: destColumn.name }; // ← 修正
+    
             destItems.splice(destination.index, 0, movedItem);
     
             const updatedColumns = {
@@ -50,11 +79,10 @@ function KanbanBoard() {
                 [destination.droppableId]: { ...destColumn, items: destItems },
             };
     
-            // API でステータスを更新
             fetch(`/api/tasks/${movedItem.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: destination.droppableId }),
+                body: JSON.stringify({ status_id: destination.droppableId }),
             })
             .then(response => response.json())
             .then(data => console.log('Updated:', data))
@@ -71,29 +99,59 @@ function KanbanBoard() {
         fetch('/api/tasks', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ content: newTask, status: "todo" })
+            body: JSON.stringify({ content: newTask, status_id: 1 })
         })
         .then(response => response.json())
         .then((newTaskObj) => {
             setColumns((prevColumns) => {
-                const todoColumn = prevColumns["todo"] || { name: "To Do", items: [] };
+                const todoColumn = prevColumns[1] || { name: 1, items: [] };
                 return {
                     ...prevColumns,
-                    todo: {
+                    1: {
                         ...todoColumn,
                         items: [...todoColumn.items, newTaskObj],
                     },
                 };
             });
 
-            setNewTask(""); // 入力欄をクリア
+            setNewTask("");
         })
         .catch(error => console.error('Error adding task:', error));
     };
 
+    const addStatus = () => {
+        if (!newStatus.trim()) return;
+
+        fetch('/api/statuses', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: newStatus }),
+        })
+        .then(response => response.json())
+        .then((newStatusObj) => {
+            setColumns((prevColumns) => ({
+                ...prevColumns,
+                [newStatusObj.name]: { name: newStatusObj.name, items: [] },
+            }));
+
+            setNewStatus("");
+        })
+        .catch(error => console.error('Error adding status:', error));
+    };
+
     return (
         <div>
-            {/* タスク追加フォーム */}
+            <div style={{ marginBottom: 20 }}>
+                <input 
+                    type="text" 
+                    value={newStatus} 
+                    onChange={(e) => setNewStatus(e.target.value)} 
+                    placeholder="新しいステータスを入力..."
+                    style={{ padding: 8, marginRight: 8 }}
+                />
+                <button onClick={addStatus} style={{ padding: 8 }}>ステータス追加</button>
+            </div>
+
             <div style={{ marginBottom: 20 }}>
                 <input 
                     type="text" 
@@ -105,11 +163,10 @@ function KanbanBoard() {
                 <button onClick={addTask} style={{ padding: 8 }}>追加</button>
             </div>
 
-            {/* カンバンボード */}
             <DragDropContext onDragEnd={onDragEnd}>
                 <div style={{ display: 'flex', gap: '16px' }}>
                     {Object.entries(columns).map(([columnId, column]) => (
-                        <Droppable key={columnId} droppableId={columnId}>
+                        <Droppable key={columnId} droppableId={String(columnId)}>
                             {(provided, snapshot) => (
                                 <div 
                                     ref={provided.innerRef} 
@@ -144,7 +201,7 @@ function KanbanBoard() {
                                             )}
                                         </Draggable>
                                     ))}
-                                    {provided.placeholder}
+                                    {provided.placeholder} 
                                 </div>
                             )}
                         </Droppable>

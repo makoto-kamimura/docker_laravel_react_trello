@@ -26,10 +26,20 @@ class TaskService
         Task::create($data);
     }
 
-    public function update(int $id, array $data): void
+    // public function update(int $id, array $data): void
+    // {
+    //     $task = $this->getById($id);
+    //     if (!$task) { return; }
+
+    //     $task->update($data);
+    // }
+    public function update(int $id, array $data)
     {
-        $task = $this->getById($id);
-        if (!$task) { return; }
+        $task = Task::findOrFail($id);
+
+        if (isset($data['status_id'])) {
+            $task->status_id = $data['status_id'];
+        }
 
         $task->update($data);
     }
