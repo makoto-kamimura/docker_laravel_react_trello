@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
+import { CheckCircle, Edit } from '@mui/icons-material';
+import SaveIcon from '@mui/icons-material/Save';
 import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd';
+import TaskModal from './TaskModal';
 
 interface Task {
     id: string;
     content: string;
-    status_id: string; // ← 追加
-    status: { id: string, name: string }; // ← ステータス情報をオブジェクトとして持つ
+    status_id: string;
+    status: { id: string, name: string };
+    description?: string;
+    due_date?: string;
+    completed_at?: string; 
 }
 
 interface Column {
@@ -18,10 +23,19 @@ interface Columns {
     [key: string]: Column;
 }
 
-function KanbanBoard() {
+interface KanbanBoardProps {
+    isSelectionMode: boolean;
+    searchQuery: string; 
+}
+
+const KanbanBoard: React.FC<KanbanBoardProps> = ({ isSelectionMode, searchQuery }) => {
     const [columns, setColumns] = useState<Columns>({});
     const [newTask, setNewTask] = useState("");
     const [newStatus, setNewStatus] = useState("");
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+    const [selectedTasks, setSelectedTasks] = useState<Set<string>>(new Set());
+    const [selectedStatuses, setSelectedStatuses] = useState<Set<string>>(new Set());
 
     useEffect(() => {
         Promise.all([
@@ -29,16 +43,11 @@ function KanbanBoard() {
             fetch('/api/statuses').then(response => response.json())
         ])
         .then(([tasksData, statusesData]) => {
-            console.log("Tasks:", tasksData);
-            console.log("Statuses:", statusesData);
-    
             const statusMap = statusesData.reduce((acc: { [key: string]: string }, status: { id: string, name: string }) => {
                 acc[status.id] = status.name;
                 return acc;
             }, {});
-    
-            console.log("Status Map:", statusMap);
-    
+
             const initialColumns: Columns = {};
             statusesData.forEach((status: { id: string, name: string }) => {
                 initialColumns[status.id] = {
@@ -46,52 +55,48 @@ function KanbanBoard() {
                     items: tasksData.filter((task: Task) => String(task.status_id) === String(status.id))
                 };
             });
-    
-            console.log("Initial Columns:", initialColumns);
+
             setColumns(initialColumns);
         })
         .catch(error => console.error('Error fetching data:', error));
     }, []);
-    
 
     const onDragEnd = (result: DropResult) => {
         if (!result.destination) return;
-    
+
         const { source, destination } = result;
-    
+
         setColumns((prevColumns) => {
             const sourceColumn = prevColumns[source.droppableId];
             const destColumn = prevColumns[destination.droppableId];
-    
+
             if (!sourceColumn || !destColumn) return prevColumns;
-    
+
             const sourceItems = [...sourceColumn.items];
             const destItems = [...destColumn.items];
-    
+
             const [movedItem] = sourceItems.splice(source.index, 1);
-            movedItem.status = { id: destination.droppableId, name: destColumn.name }; // ← 修正
-    
+            movedItem.status = { id: destination.droppableId, name: destColumn.name };
+
             destItems.splice(destination.index, 0, movedItem);
-    
+
             const updatedColumns = {
                 ...prevColumns,
                 [source.droppableId]: { ...sourceColumn, items: sourceItems },
                 [destination.droppableId]: { ...destColumn, items: destItems },
             };
-    
+
             fetch(`/api/tasks/${movedItem.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status_id: destination.droppableId }),
             })
             .then(response => response.json())
-            .then(data => console.log('Updated:', data))
             .catch(error => console.error('Error updating task status:', error));
-    
+
             return updatedColumns;
         });
     };
-    
 
     const addTask = () => {
         if (!newTask.trim()) return;
@@ -131,7 +136,7 @@ function KanbanBoard() {
         .then((newStatusObj) => {
             setColumns((prevColumns) => ({
                 ...prevColumns,
-                [newStatusObj.name]: { name: newStatusObj.name, items: [] },
+                [newStatusObj.id]: { name: newStatusObj.name, items: [] },
             }));
 
             setNewStatus("");
@@ -139,35 +144,132 @@ function KanbanBoard() {
         .catch(error => console.error('Error adding status:', error));
     };
 
+    const updateStatusName = (columnId: string, newName: string) => {
+        if (!newName.trim()) return;
+    
+        fetch(`/api/statuses/${columnId}/name`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: newName }),
+        })
+        .then(response => response.json())
+        .then(updatedStatus => {
+            setColumns(prevColumns => ({
+                ...prevColumns,
+                [columnId]: {
+                    ...prevColumns[columnId],
+                    name: updatedStatus.name,
+                },
+            }));
+        })
+        .catch(error => console.error('Error updating status name:', error));
+    };    
+
+    const saveTaskDetails = () => {
+        if (selectedTask && selectedTask.id) {
+            const taskData = {
+                content: selectedTask.content,
+                description: selectedTask.description,
+                due_date: selectedTask.due_date || null,
+                completed_at: selectedTask.completed_at 
+                    ? new Date(selectedTask.completed_at).toISOString().slice(0, 19).replace('T', ' ') 
+                    : null, // "YYYY-MM-DD HH:MM:SS" に変換
+            };
+    
+            console.log('Sending data:', taskData); // ログで確認
+    
+            fetch(`/api/tasks/${selectedTask.id}/details`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(taskData),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Task updated:', data);
+    
+                // Kanban の状態を更新
+                setColumns(prevColumns => {
+                    const updatedColumns = { ...prevColumns };
+                    for (const columnId in updatedColumns) {
+                        updatedColumns[columnId].items = updatedColumns[columnId].items.map(task =>
+                            task.id === data.id ? { ...task, content: data.content, description: data.description } : task
+                        );
+                    }
+                    return updatedColumns;
+                });
+    
+                closeModal(); // 保存後にモーダルを閉じる
+            })
+            .catch(error => console.error('Error updating task:', error));
+        }
+    };
+
+    const handleTaskSelection = (taskId: string) => {
+        setSelectedTasks(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(taskId)) {
+                newSet.delete(taskId);
+            } else {
+                newSet.add(taskId);
+            }
+            return newSet;
+        });
+    };
+
+    const handleStatusSelection = (statusId: string) => {
+        setSelectedStatuses(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(statusId)) {
+                newSet.delete(statusId);
+            } else {
+                newSet.add(statusId);
+            }
+            return newSet;
+        });
+    };
+    
+    const openModal = (task: Task) => {
+        setSelectedTask(task);
+        setIsModalOpen(true);
+
+        // 詳細情報を取得
+        fetch(`/api/tasks/${task.id}`)
+            .then(response => response.json())
+            .then(data => {
+                setSelectedTask(prevState => {
+                    if (prevState) {
+                        return { ...prevState, description: data.description }; // 詳細情報を更新
+                    }
+                    return prevState;
+                });
+            })
+            .catch(error => console.error('Error fetching task details:', error));
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setSelectedTask(null);
+    };
+
+    const filteredColumns = Object.entries(columns).reduce((acc: Columns, [columnId, column]) => {
+        const filteredItems = column.items.filter(item => item.content.toLowerCase().includes(searchQuery.toLowerCase()));
+        if (filteredItems.length > 0) {
+            acc[columnId] = { ...column, items: filteredItems };
+        }
+        return acc;
+    }, {});
+
     return (
         <div>
-            <div style={{ marginBottom: 20 }}>
-                <input 
-                    type="text" 
-                    value={newStatus} 
-                    onChange={(e) => setNewStatus(e.target.value)} 
-                    placeholder="新しいステータスを入力..."
-                    style={{ padding: 8, marginRight: 8 }}
-                />
-                <button onClick={addStatus} style={{ padding: 8 }}>ステータス追加</button>
-            </div>
-
-            <div style={{ marginBottom: 20 }}>
-                <input 
-                    type="text" 
-                    value={newTask} 
-                    onChange={(e) => setNewTask(e.target.value)} 
-                    placeholder="新しいタスクを入力..."
-                    style={{ padding: 8, marginRight: 8 }}
-                />
-                <button onClick={addTask} style={{ padding: 8 }}>追加</button>
-            </div>
-
             <DragDropContext onDragEnd={onDragEnd}>
                 <div style={{ display: 'flex', gap: '16px' }}>
-                    {Object.entries(columns).map(([columnId, column]) => (
-                        <Droppable key={columnId} droppableId={String(columnId)}>
-                            {(provided, snapshot) => (
+                {Object.entries(filteredColumns).map(([columnId, column]) => (
+                    <Droppable key={columnId} droppableId={String(columnId)}>
+                        {(provided, snapshot) => {
+                            const [isEditing, setIsEditing] = useState(false);
+                            const [statusName, setStatusName] = useState(column.name);
+
+                            return (
                                 <div 
                                     ref={provided.innerRef} 
                                     {...provided.droppableProps} 
@@ -179,7 +281,42 @@ function KanbanBoard() {
                                         minHeight: 200
                                     }}
                                 >
-                                    <h3>{column.name}</h3>
+                                    {/* ステータスのチェックボックス */}
+                                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                                        {/* <h3>{column.name}</h3> */}
+                                        {isSelectionMode && (
+                                            <input 
+                                                type="checkbox"
+                                                checked={selectedStatuses.has(columnId)}
+                                                onChange={() => handleStatusSelection(columnId)}
+                                            />
+                                        )}
+                                    </div>
+
+                                    {isEditing ? (
+                                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                            <input
+                                                type="text"
+                                                value={statusName}
+                                                onChange={(e) => setStatusName(e.target.value)}
+                                                style={{ padding: "4px", flexGrow: 1 }}
+                                            />
+                                            <button onClick={() => {
+                                                updateStatusName(columnId, statusName);
+                                                setIsEditing(false);
+                                            }} style={{ border: "none", background: "transparent", cursor: "pointer" }}>
+                                                <SaveIcon />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                            <h3>{column.name}</h3>
+                                            <button onClick={() => setIsEditing(true)} style={{ border: "none", background: "transparent", cursor: "pointer" }}>
+                                                <Edit />
+                                            </button>
+                                        </div>
+                                    )}
+
                                     {column.items.map((item, index) => (
                                         <Draggable key={String(item.id)} draggableId={String(item.id)} index={index}>
                                             {(provided, snapshot) => (
@@ -193,9 +330,20 @@ function KanbanBoard() {
                                                         background: snapshot.isDragging ? '#e0e0e0' : 'white',
                                                         borderRadius: 4,
                                                         boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                                                        cursor: 'pointer',
                                                         ...provided.draggableProps.style
                                                     }}
+                                                    onClick={() => openModal(item)} 
                                                 >
+                                                    {/* タスクのチェックボックス */}
+                                                    {isSelectionMode && (
+                                                        <input 
+                                                            type="checkbox"
+                                                            checked={selectedTasks.has(item.id)}
+                                                            onChange={() => handleTaskSelection(item.id)}
+                                                        />
+                                                    )}
+
                                                     {item.content}
                                                 </div>
                                             )}
@@ -203,17 +351,22 @@ function KanbanBoard() {
                                     ))}
                                     {provided.placeholder} 
                                 </div>
-                            )}
-                        </Droppable>
-                    ))}
+                            );
+                        }}
+                    </Droppable>
+                ))}
                 </div>
             </DragDropContext>
+
+            <TaskModal 
+                isOpen={isModalOpen} 
+                task={selectedTask} 
+                onClose={closeModal} 
+                onSave={saveTaskDetails} 
+                setTask={setSelectedTask} 
+            />
         </div>
     );
 }
 
 export default KanbanBoard;
-
-if (document.getElementById('kanban-board')) {
-    ReactDOM.render(<KanbanBoard />, document.getElementById('kanban-board'));
-}

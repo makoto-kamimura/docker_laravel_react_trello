@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\TaskController;
-use App\Http\Controllers\StatusController;
+use App\Http\Controllers\Api\StatusController;
 
 // Route::group(['prefix' => '/tasks', 'as' => 'tasks.'], function () {
 //     Route::get('/', [TaskController::class, 'list']);
@@ -22,3 +22,12 @@ Route::patch('/tasks/{id}', [TaskController::class, 'update']);
 
 Route::get('/statuses', [StatusController::class, 'index']);
 Route::post('/statuses', [StatusController::class, 'store']);
+
+Route::delete('/tasks/{id}', [TaskController::class, 'destroy']);
+Route::delete('/statuses/{id}', [StatusController::class, 'destroy']);
+
+Route::get('/tasks/{task}', [TaskController::class, 'show']);
+Route::patch('/tasks/{id}/details', [TaskController::class, 'updateDetail']); // descriptionの更新
+Route::patch('/statuses/{id}/name', [TaskController::class, 'updateStatusName']);
+
+

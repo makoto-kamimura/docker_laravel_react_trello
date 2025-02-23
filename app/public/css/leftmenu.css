@@ -1,0 +1,1 @@
+.left-menu{background-color:#f4f4f4;border-right:2px solid #ddd;height:100vh;left:0;padding:20px;position:fixed;top:0;transition:width .3s ease;width:70px}.left-menu:hover{width:250px}.menu-content{height:100%;overflow:hidden;transition:width .3s ease;width:100%}.left-menu:hover .menu-content{width:100%}

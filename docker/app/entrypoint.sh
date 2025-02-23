@@ -24,6 +24,10 @@ npm install
 # caniuse-liteの更新
 npx update-browserslist-db@latest
 
+# MUIとアイコンライブラリをインストール
+echo "📦 MUIとアイコンライブラリをインストール..."
+npm install @mui/icons-material @mui/material @emotion/react @emotion/styled || echo "⚠️ MUIのインストールに失敗しました"
+
 # ビルドを実行
 # npm run hot
 npm run production --no-cache

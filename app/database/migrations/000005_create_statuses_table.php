@@ -8,9 +8,9 @@ return new class extends Migration {
     public function up()
     {
         Schema::create('statuses', function (Blueprint $table) {
-            $table->id();
-            $table->string('name')->unique();
-            $table->timestamps();
+            $table->id()->comment('ステータスID'); // 主キー
+            $table->string('name')->unique()->comment('ステータス名'); // ユニークなステータス名
+            $table->timestamps(); // created_at & updated_at
         });
     }
 

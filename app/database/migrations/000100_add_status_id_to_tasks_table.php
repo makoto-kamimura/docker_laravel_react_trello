@@ -8,7 +8,11 @@ return new class extends Migration {
     public function up()
     {
         Schema::table('tasks', function (Blueprint $table) {
-            $table->unsignedBigInteger('status_id')->after('content')->nullable();
+            $table->unsignedBigInteger('status_id')
+                ->after('content')
+                ->nullable()
+                ->comment('ステータスID（statusesテーブルの外部キー）'); // ステータスの外部キー
+            
             $table->foreign('status_id')->references('id')->on('statuses')->onDelete('cascade');
         });
     }

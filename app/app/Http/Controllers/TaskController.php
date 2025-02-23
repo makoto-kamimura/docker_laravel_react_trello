@@ -7,7 +7,7 @@ use App\Http\Requests\Task\CreateTaskRequest;
 use App\Http\Requests\Task\ListTasksRequest;
 use App\Http\Requests\Task\ReorderTasksRequest;
 use App\Http\Requests\Task\UpdateTaskRequest;
-use App\Services\ProjectService;
+// use App\Services\ProjectService;
 use App\Services\TaskService;
 use Illuminate\Http\JsonResponse;
 
@@ -22,10 +22,10 @@ class TaskController extends Controller
 
     public function index()
     {
-        $projects = (new ProjectService())->getAll();
+        // $projects = (new ProjectService())->getAll();
 
         return view('tasks.index', [
-            'projects' => $projects,
+            // 'projects' => $projects,
         ]);
     }
 
@@ -75,16 +75,6 @@ class TaskController extends Controller
         return response()->json([
             'success' => true,
             'message' => "Task updated successfully.",
-        ], 201);
-    }
-
-    public function delete(int $id): JsonResponse
-    {
-        $this->taskService->delete($id);
-
-        return response()->json([
-            'success' => true,
-            'message' => "Task deleted successfully.",
         ], 201);
     }
 

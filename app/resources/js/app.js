@@ -14,5 +14,6 @@ require('./bootstrap');
 
 // require('./components/task/Tasks');
 // require('./components/KanbanBoard');
-require('./components/App');
+// require('./components/App');
+require('./components/Index');
 // require('../react/Main');
