@@ -66,6 +66,11 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ isSelectionMode, searchQuery 
 
         const { source, destination } = result;
 
+        // 同じステータスにドラッグされた場合は何もしない
+        if (source.droppableId === destination.droppableId && source.index === destination.index) {
+            return;
+        }
+
         setColumns((prevColumns) => {
             const sourceColumn = prevColumns[source.droppableId];
             const destColumn = prevColumns[destination.droppableId];
