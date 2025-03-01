@@ -11,6 +11,7 @@ return new class extends Migration {
             $table->string('content')->comment('タスクの内容'); // タスクのタイトル
             $table->text('description')->nullable()->comment('タスクの詳細説明'); // 任意の詳細説明
             $table->date('due_date')->comment('タスクの期限日'); // 締切日
+            // $table->date('due_date')->default(Carbon::now()->addDays(3))->change()->comment('タスクの期限日');
             $table->timestamp('completed_at')->nullable()->comment('タスクの完了日時'); // いつ完了したか
             $table->timestamps(); // created_at & updated_at
         });

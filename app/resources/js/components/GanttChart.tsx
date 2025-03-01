@@ -11,14 +11,16 @@ interface Task {
   content: string;
   created_at: string;
   due_date: string;
+  completed_at?: string; // completed_atプロパティを追加
   status: { id: string, name: string };
 }
 
 interface GanttChartProps {
   searchQuery: string;
+  showCompleted: boolean;
 }
 
-const GanttChart: React.FC<GanttChartProps> = ({ searchQuery }) => {
+const GanttChart: React.FC<GanttChartProps> = ({ searchQuery, showCompleted }) => {
   const [viewMode, setViewMode] = useState<'monthly' | 'yearly'>('monthly');
   const [tasks, setTasks] = useState<Task[]>([]); // タスクを格納する状態
   const [tasksToShow, setTasksToShow] = useState<Task[]>([]); // 初期表示タスク
@@ -79,8 +81,12 @@ const GanttChart: React.FC<GanttChartProps> = ({ searchQuery }) => {
     setShowAllTasks(false); // ボタンの表示状態を変更
   };
 
-  // 検索クエリに基づいてタスクをフィルタリング
-  const filteredTasks = tasksToShow.filter(task => task.content.toLowerCase().includes(searchQuery.toLowerCase()));
+  // 検索クエリと完了済み表示に基づいてタスクをフィルタリング
+  const filteredTasks = tasksToShow.filter(task => {
+    const matchesQuery = task.content.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCompleted = showCompleted ? !task.completed_at : true;
+    return matchesQuery && matchesCompleted;
+  });
 
   // 表示モード切り替えボタンの処理
   const toggleTaskView = () => {
@@ -92,14 +98,30 @@ const GanttChart: React.FC<GanttChartProps> = ({ searchQuery }) => {
       {/* タイトル（クリックで切り替え） */}
       <div style={{ display: 'flex', marginBottom: '8px', cursor: 'pointer' }}>
         <div
-          style={{ width: '200px', fontWeight: 'bold' }}
-          onClick={toggleViewMode}
+          style={{
+            width: "200px",
+            fontWeight: "bold",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between", // 左右端に配置
+          }}
         >
-          {viewMode === 'monthly'
-            ? today.toLocaleString('default', { month: 'long' }) // **月間表示：月名**
-            : today.getFullYear()} {/* **年間表示：年** */}
-          <SwapHorizIcon />
+          <span>
+            {viewMode === "monthly"
+              ? today.toLocaleString("default", { month: "long" }) // **月間表示：月名**
+              : today.getFullYear()} {/* **年間表示：年** */}
+          </span>
+
+          <SwapHorizIcon
+            onClick={toggleViewMode}
+            style={{
+              cursor: "pointer",
+              fontSize: "32px", // アイコンの大きさ調整
+              color: "#007BFF", // 色を設定
+            }}
+          />
         </div>
+
         {dateRange.map((date, index) => (
           <div
             key={index}
@@ -223,53 +245,55 @@ const GanttChart: React.FC<GanttChartProps> = ({ searchQuery }) => {
       )}
 
       {/* 「さらに表示する」または「5件表示に戻す」ボタン */}
-      <div style={{ textAlign: 'right', marginTop: '10px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '8px' }}>
-        {/* 表示モード切り替えボタン */}
-        <button
-          onClick={toggleTaskView}
-          style={{
-            padding: "10px",
-            borderRadius: "50%",
-            backgroundColor: "#007BFF",
-            color: "white",
-            border: "none",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-          }}
-        >
-          {isTaskView ? <DashboardIcon /> : <ViewListIcon />}
-        </button>
-        {!showAllTasks ? (
+      <div style={{ textAlign: 'right', marginTop: '10px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '8px', width: '100%' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
+          {/* 表示モード切り替えボタン */}
           <button
-            onClick={handleShowAllTasks}
+            onClick={toggleTaskView}
             style={{
-              padding: '10px',
-              borderRadius: '50%',
-              backgroundColor: '#007BFF',
-              color: 'white',
-              border: 'none',
-              cursor: 'pointer',
+              padding: "10px",
+              borderRadius: "50%",
+              backgroundColor: "#007BFF",
+              color: "white",
+              border: "none",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
             }}
           >
-            <ArrowDownwardIcon />
+            {isTaskView ? <DashboardIcon /> : <ViewListIcon />}
           </button>
-        ) : (
-          <button
-            onClick={handleShowFiveTasks}
-            style={{
-              padding: '10px',
-              borderRadius: '50%',
-              backgroundColor: '#007BFF',
-              color: 'white',
-              border: 'none',
-              cursor: 'pointer',
-            }}
-          >
-            <ArrowUpwardIcon />
-          </button>
-        )}
+          {!showAllTasks ? (
+            <button
+              onClick={handleShowAllTasks}
+              style={{
+                padding: '10px',
+                borderRadius: '50%',
+                backgroundColor: '#007BFF',
+                color: 'white',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              <ArrowDownwardIcon />
+            </button>
+          ) : (
+            <button
+              onClick={handleShowFiveTasks}
+              style={{
+                padding: '10px',
+                borderRadius: '50%',
+                backgroundColor: '#007BFF',
+                color: 'white',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              <ArrowUpwardIcon />
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

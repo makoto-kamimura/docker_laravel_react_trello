@@ -4,6 +4,8 @@ export interface Task {
     status_id: string;
     status: { id: string, name: string };
     description?: string;
+    due_date?: string;
+    completed_at?: string; 
 }
 
 export interface Column {

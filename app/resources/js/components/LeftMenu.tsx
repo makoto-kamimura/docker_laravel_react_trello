@@ -21,51 +21,51 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ setColumns, isSelectionMode, setIsS
   const [newTask, setNewTask] = useState('');
   const [selectedStatuses, setSelectedStatuses] = useState<Set<string>>(new Set());
 
-  const addStatus = () => {
-    if (!newStatus.trim()) return;
+  // const addStatus = () => {
+  //   if (!newStatus.trim()) return;
 
-    fetch('/api/statuses', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: newStatus }),
-    })
-    .then(response => response.json())
-    .then((newStatusObj) => {
-      setColumns(prevColumns => ({
-        ...prevColumns,
-        [newStatusObj.id]: { name: newStatusObj.name, items: [] },
-      }));
+  //   fetch('/api/statuses', {
+  //     method: 'POST',
+  //     headers: { 'Content-Type': 'application/json' },
+  //     body: JSON.stringify({ name: newStatus }),
+  //   })
+  //   .then(response => response.json())
+  //   .then((newStatusObj) => {
+  //     setColumns(prevColumns => ({
+  //       ...prevColumns,
+  //       [newStatusObj.id]: { name: newStatusObj.name, items: [] },
+  //     }));
 
-      setNewStatus('');
-    })
-    .catch(error => console.error('Error adding status:', error));
-  };
+  //     setNewStatus('');
+  //   })
+  //   .catch(error => console.error('Error adding status:', error));
+  // };
 
-  const addTask = () => {
-    if (!newTask.trim()) return;
+  // const addTask = () => {
+  //   if (!newTask.trim()) return;
 
-    fetch('/api/tasks', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: newTask, status_id: 1 })
-    })
-    .then(response => response.json())
-    .then((newTaskObj) => {
-      setColumns(prevColumns => {
-        const todoColumn = prevColumns[1] || { name: 'To Do', items: [] };
-        return {
-          ...prevColumns,
-          1: {
-            ...todoColumn,
-            items: [...todoColumn.items, newTaskObj],
-          },
-        };
-      });
+  //   fetch('/api/tasks', {
+  //     method: 'POST',
+  //     headers: { 'Content-Type': 'application/json' },
+  //     body: JSON.stringify({ content: newTask, status_id: 1 })
+  //   })
+  //   .then(response => response.json())
+  //   .then((newTaskObj) => {
+  //     setColumns(prevColumns => {
+  //       const todoColumn = prevColumns[1] || { name: 'To Do', items: [] };
+  //       return {
+  //         ...prevColumns,
+  //         1: {
+  //           ...todoColumn,
+  //           items: [...todoColumn.items, newTaskObj],
+  //         },
+  //       };
+  //     });
 
-      setNewTask('');
-    })
-    .catch(error => console.error('Error adding task:', error));
-  };
+  //     setNewTask('');
+  //   })
+  //   .catch(error => console.error('Error adding task:', error));
+  // };
 
   const toggleSelectionMode = () => {
     if (isSelectionMode) {
@@ -153,7 +153,7 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ setColumns, isSelectionMode, setIsS
             width: '100%',
           }}
         >
-          <div style={{ marginBottom: 20 }}>
+          {/* <div style={{ marginBottom: 20 }}>
             <input
               type="text"
               value={newStatus}
@@ -161,12 +161,23 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ setColumns, isSelectionMode, setIsS
               placeholder="新しいステータスを入力..."
               style={{ padding: 8, marginRight: 8, width: '100%' }}
             />
-            <button onClick={addStatus} style={{ padding: 8, width: '100%' }}>
+            <button onClick={addStatus} style={{
+              //  padding: 8, width: '100%'
+               padding: "10px",
+               borderRadius: "50%",
+               backgroundColor: "#007BFF",
+               color: "white",
+               border: "none",
+               cursor: "pointer",
+               display: "flex",
+               alignItems: "center",
+               gap: "8px",
+                }}>
               <Add />
             </button>
-          </div>
+          </div> */}
 
-          <div style={{ marginBottom: 20 }}>
+          {/* <div style={{ marginBottom: 20 }}>
             <input
               type="text"
               value={newTask}
@@ -174,15 +185,38 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ setColumns, isSelectionMode, setIsS
               placeholder="新しいタスクを入力..."
               style={{ padding: 8, marginRight: 8, width: '100%' }}
             />
-            <button onClick={addTask} style={{ padding: 8, width: '100%' }}>
+            <button onClick={addTask} style={{
+              //  padding: 8, width: '100%'
+              padding: "10px",
+              borderRadius: "50%",
+              backgroundColor: "#007BFF",
+              color: "white",
+              border: "none",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+                }}>
               <Add />
             </button>
-          </div>
+          </div> */}
 
           <div style={{ marginBottom: 20 }}>
-            <button onClick={toggleSelectionMode} style={{ padding: 8, width: '100%' }}>
+            {/* <button onClick={toggleSelectionMode} style={{
+              //  padding: 8, width: '100%'
+               padding: "10px",
+               borderRadius: "50%",
+               backgroundColor: "#007BFF",
+               color: "white",
+               border: "none",
+               cursor: "pointer",
+               display: "flex",
+               alignItems: "center",
+               gap: "8px",
+                }}>
               {isSelectionMode ? <DeleteIcon /> : <CheckBoxIcon />}
-            </button>
+            </button> */}
+            ToDoProject
           </div>
         </div>
       </div>

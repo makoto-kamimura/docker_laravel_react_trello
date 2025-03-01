@@ -87,20 +87,24 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, task, onClose, onSave, se
                                 completed_at: e.target.checked ? new Date().toISOString().split('T')[0] : "" 
                             } : prevTask);
                         }}
+                        style={{ marginRight: '10px', transform: 'scale(1.5)' }} // チェックボックスを大きくする
                     />
 
-                    {task.completed_at && (
-                        <input
-                            type="date"
-                            value={formatDate(task.completed_at)}
-                            style={{ width: '85%', marginTop: '10px', padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
-                        />
-                    )}
+                    <input
+                        type="date"
+                        value={task.completed_at ? formatDate(task.completed_at) : ""}
+                        style={{ width: '85%', marginTop: '10px', padding: '10px', borderRadius: '4px', border: '1px solid #ccc', visibility: task.completed_at ? 'visible' : 'hidden' }}
+                        readOnly={!task.completed_at}
+                    />
                 </div>
 
-                <button onClick={onSave} style={{ marginTop: '10px' }}>
-                    <SaveIcon />
-                </button>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
+                    <button onClick={onSave} style={{
+                        border: "none", background: "transparent", cursor: "pointer"
+                    }}>
+                        <SaveIcon />
+                    </button>
+                </div>
             </div>
             <div onClick={onClose} style={{
                 position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 999
