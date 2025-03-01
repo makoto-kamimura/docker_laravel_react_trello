@@ -4,15 +4,15 @@ services:
       context: .
       dockerfile: docker/app/Dockerfile
     ports:
-      - "8000:80"  # 本番用のApacheポート（公開）
-      # - "3000:3000"  # 開発用のReactホットリロード（開発用に制限）
+      - "8000:80" # Apache は外部公開
+      # - "3000:3000" # Laravel Mix は外部公開しない
     volumes:
       - ./app:/var/www/html
       - ./docker/app/apache/apache.conf:/etc/apache2/sites-available/000-default.conf
       - ./docker/app/php/php.ini:/usr/local/etc/php/php.ini
     depends_on:
       db:
-        condition: service_healthy  # MySQL が起動するのを待つ
+        condition: service_healthy
     environment:
       - DB_HOST=db
       - DB_PORT=3306
@@ -21,8 +21,8 @@ services:
       - DB_PASSWORD=password
     networks:
       - laravel_react
-    command: >
-      bash -c "npm install && npm run hot"  # ホットリロードを有効にするコマンド
+    # command: >
+    #   bash -c "npm install && npm run hot" # Laravel Mix を起動
 
   db:
     build:
@@ -30,6 +30,7 @@ services:
       dockerfile: docker/db/Dockerfile
     volumes:
       - ./db:/var/lib/mysql
+      # - ./docker/db/mysql/my.cnf /etc/mysql/my.cnf
     environment:
       MYSQL_DATABASE: laravel_db
       MYSQL_ROOT_PASSWORD: rootpassword
