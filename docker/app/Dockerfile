@@ -19,10 +19,6 @@ WORKDIR /var/www/html
 COPY app /var/www/html
 RUN composer install --no-dev --optimize-autoloader
 
-# React フロントエンドをビルド
-# RUN npm install
-# npm run production --no-cache
-
 # パーミッション設定
 RUN chmod -R 777 /var/www/html/public
 RUN chown -R www-data:www-data /var/www/html/public
