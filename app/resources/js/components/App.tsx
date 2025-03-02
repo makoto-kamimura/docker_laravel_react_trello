@@ -4,11 +4,7 @@ import KanbanBoard from './KanbanBoard';
 import GanttChart from './GanttChart';
 import SearchBar from './SearchBar';
 import AppButton from './AppButton';
-
-interface Column {
-  name: string;
-  items: any[];
-}
+import { Column } from './types'; // 追加
 
 const App: React.FC = () => {
   const [columns, setColumns] = useState<{ [key: string]: Column }>({});

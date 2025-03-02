@@ -4,6 +4,7 @@ import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import DoneIcon from '@mui/icons-material/Done';
 import AppsIcon from '@mui/icons-material/Apps';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { Column } from './types'; // 追加
 
 interface AppButtonProps {
   isSelectionMode: boolean;
@@ -16,11 +17,6 @@ interface AppButtonProps {
   setSelectedTasks: React.Dispatch<React.SetStateAction<Set<string>>>;
   selectedStatuses: Set<string>;
   setSelectedStatuses: React.Dispatch<React.SetStateAction<Set<string>>>;
-}
-
-interface Column {
-  name: string;
-  items: any[];
 }
 
 const AppButton: React.FC<AppButtonProps> = ({
@@ -52,21 +48,26 @@ const AppButton: React.FC<AppButtonProps> = ({
 
   const handleSelectAll = () => {
     if (allSelected) {
+      // すべてのタスクとステータスを選択解除
       deselectAllItems();
     } else {
+      // すべてのタスクとステータスを選択
       const allTaskIds = new Set<string>();
       const allStatusIds = new Set<string>();
-
+  
+      // 各カラムのタスクとステータスを収集
       Object.keys(columns).forEach(columnId => {
         allStatusIds.add(columnId);
         columns[columnId].items.forEach(task => {
           allTaskIds.add(task.id);
         });
       });
-
+  
+      // 選択されたタスクとステータスを更新
       setSelectedTasks(allTaskIds);
       setSelectedStatuses(allStatusIds);
     }
+    // 選択状態を反転
     setAllSelected(!allSelected);
   };
 

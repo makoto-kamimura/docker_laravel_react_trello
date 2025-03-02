@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-// import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
 import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd';
 import TaskModal from './TaskModal';
 import AddStatus from './AddStatus';

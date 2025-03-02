@@ -5,7 +5,8 @@ export interface Task {
     status: { id: string, name: string };
     description?: string;
     due_date?: string;
-    completed_at?: string; 
+    completed_at?: string;
+    created_at: string; // 追加
 }
 
 export interface Column {

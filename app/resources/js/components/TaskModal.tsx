@@ -1,15 +1,6 @@
 import React from 'react';
 import SaveIcon from '@mui/icons-material/Save';
-
-interface Task {
-    id: string;
-    content: string;
-    status_id: string;
-    status: { id: string, name: string };
-    description?: string;
-    due_date?: string;
-    completed_at?: string; 
-}
+import { Task } from './types'; // 追加
 
 interface TaskModalProps {
     isOpen: boolean;

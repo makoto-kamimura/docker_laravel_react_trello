@@ -2,12 +2,7 @@ import React, { useState } from 'react';
 import { Add } from '@mui/icons-material';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import DeleteIcon from '@mui/icons-material/Delete';
-
-interface Column {
-  name: string;
-  items: any[];
-}
-
+import { Column } from './types';
 interface LeftMenuProps {
   setColumns: React.Dispatch<React.SetStateAction<{ [key: string]: Column }>>;
   isSelectionMode: boolean;

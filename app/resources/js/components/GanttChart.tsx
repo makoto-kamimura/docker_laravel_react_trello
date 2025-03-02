@@ -5,15 +5,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'; // 「さら�
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'; // 「5件表示に戻す」ボタンに使うアイコン
 import ViewListIcon from '@mui/icons-material/ViewList';
 import DashboardIcon from '@mui/icons-material/Dashboard';
-
-interface Task {
-  id: string;
-  content: string;
-  created_at: string;
-  due_date: string;
-  completed_at?: string; // completed_atプロパティを追加
-  status: { id: string, name: string };
-}
+import { Task } from './types'; // 追加
 
 interface GanttChartProps {
   searchQuery: string;
@@ -139,7 +131,7 @@ const GanttChart: React.FC<GanttChartProps> = ({ searchQuery, showCompleted }) =
       {isTaskView ? (
         filteredTasks.map(task => {
           const taskStart = new Date(task.created_at);
-          const taskEnd = new Date(task.due_date);
+          const taskEnd = task.due_date ? new Date(task.due_date) : new Date(); // due_date が undefined の場合の処理
 
           // **年間モード：タスクの開始日と終了日がその年の範囲に合わせて調整**
           const adjustedTaskStart = taskStart < startOfYear ? startOfYear : taskStart;
@@ -196,7 +188,7 @@ const GanttChart: React.FC<GanttChartProps> = ({ searchQuery, showCompleted }) =
             <h3>{status}</h3>
             {tasks.map(task => {
               const taskStart = new Date(task.created_at);
-              const taskEnd = new Date(task.due_date);
+              const taskEnd = task.due_date ? new Date(task.due_date) : new Date(); // due_date が undefined の場合の処理
 
               // **年間モード：タスクの開始日と終了日がその年の範囲に合わせて調整**
               const adjustedTaskStart = taskStart < startOfYear ? startOfYear : taskStart;
