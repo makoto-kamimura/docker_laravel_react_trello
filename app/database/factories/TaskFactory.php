@@ -6,13 +6,20 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\Task;
 use App\Models\Status;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Artisan;
 
 class TaskFactory extends Factory
 {
     protected $model = Task::class;
+    protected static $sortOrder = 1;
 
     public function definition(): array
     {
+        // ステータスが存在しない場合はシーダーを実行
+        if (Status::count() == 0) {
+            Artisan::call('db:seed', ['--class' => 'Database\\Seeders\\StatusesTableSeeder']);
+        }
+                
         // 現在の日付から1ヶ月前までのランダムな日付を設定
         $startDate = Carbon::now()->subMonth(); // 現在日付から1ヶ月前
         $endDate = Carbon::now(); // 現在の日付
@@ -28,6 +35,7 @@ class TaskFactory extends Factory
             'due_date' => $this->faker->dateTimeBetween($dueDateStart, $dueDateEnd)->format('Y-m-d'), // 現在日付から3ヶ月後までの範囲でランダムな日付
             'created_at' => $this->faker->dateTimeBetween($startDate, $endDate)->format('Y-m-d'), // 現在日付から1ヶ月前までの範囲でランダムな日付
             'completed_at' => $this->faker->optional(0.3)->dateTime, // 30%の確率で完了済みにする
+            'sort_order' => self::$sortOrder++,
         ];
     }
 }

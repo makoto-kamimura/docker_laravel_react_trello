@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Add } from '@mui/icons-material';
-import CheckBoxIcon from '@mui/icons-material/CheckBox';
-import DeleteIcon from '@mui/icons-material/Delete';
+// import { Add } from '@mui/icons-material';
+// import CheckBoxIcon from '@mui/icons-material/CheckBox';
+// import DeleteIcon from '@mui/icons-material/Delete';
 import { Column } from './types';
 interface LeftMenuProps {
   setColumns: React.Dispatch<React.SetStateAction<{ [key: string]: Column }>>;
@@ -62,58 +62,58 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ setColumns, isSelectionMode, setIsS
   //   .catch(error => console.error('Error adding task:', error));
   // };
 
-  const toggleSelectionMode = () => {
-    if (isSelectionMode) {
-        deleteSelectedItems(); // 選択モードが終了する際に削除処理を呼び出し
-    }
-    setIsSelectionMode(prev => !prev);
-    setSelectedTasks(new Set());
-    setSelectedStatuses(new Set());
-  };
+  // const toggleSelectionMode = () => {
+  //   if (isSelectionMode) {
+  //       deleteSelectedItems(); // 選択モードが終了する際に削除処理を呼び出し
+  //   }
+  //   setIsSelectionMode(prev => !prev);
+  //   setSelectedTasks(new Set());
+  //   setSelectedStatuses(new Set());
+  // };
 
-  const deleteSelectedItems = async () => {
-      try {
-          // タスク削除処理
-          await Promise.all(
-              Array.from(selectedTasks).map(taskId =>
-                  fetch(`/api/tasks/${taskId}`, { method: 'DELETE' })
-                      .catch(error => console.error('Error deleting task:', error))
-              )
-          );
+  // const deleteSelectedItems = async () => {
+  //     try {
+  //         // タスク削除処理
+  //         await Promise.all(
+  //             Array.from(selectedTasks).map(taskId =>
+  //                 fetch(`/api/tasks/${taskId}`, { method: 'DELETE' })
+  //                     .catch(error => console.error('Error deleting task:', error))
+  //             )
+  //         );
   
-          // ステータス削除処理
-          await Promise.all(
-              Array.from(selectedStatuses).map(statusId =>
-                  fetch(`/api/statuses/${statusId}`, { method: 'DELETE' })
-                      .catch(error => console.error('Error deleting status:', error))
-              )
-          );
+  //         // ステータス削除処理
+  //         await Promise.all(
+  //             Array.from(selectedStatuses).map(statusId =>
+  //                 fetch(`/api/statuses/${statusId}`, { method: 'DELETE' })
+  //                     .catch(error => console.error('Error deleting status:', error))
+  //             )
+  //         );
   
-          // UI更新
-          setColumns(prevColumns => {
-              const newColumns = { ...prevColumns };
+  //         // UI更新
+  //         setColumns(prevColumns => {
+  //             const newColumns = { ...prevColumns };
   
-              // 選択されたタスクを削除
-              Object.keys(newColumns).forEach(columnId => {
-                  newColumns[columnId].items = newColumns[columnId].items.filter(task => !selectedTasks.has(task.id));
-              });
+  //             // 選択されたタスクを削除
+  //             Object.keys(newColumns).forEach(columnId => {
+  //                 newColumns[columnId].items = newColumns[columnId].items.filter(task => !selectedTasks.has(task.id));
+  //             });
   
-              // 選択されたステータスを削除
-              selectedStatuses.forEach(statusId => {
-                  delete newColumns[statusId];
-              });
+  //             // 選択されたステータスを削除
+  //             selectedStatuses.forEach(statusId => {
+  //                 delete newColumns[statusId];
+  //             });
   
-              return newColumns;
-          });
+  //             return newColumns;
+  //         });
   
-          // 選択モード終了
-          setIsSelectionMode(false);
-          setSelectedTasks(new Set());
-          setSelectedStatuses(new Set());
-      } catch (error) {
-          console.error('Error during delete operation:', error);
-      }
-  };
+  //         // 選択モード終了
+  //         setIsSelectionMode(false);
+  //         setSelectedTasks(new Set());
+  //         setSelectedStatuses(new Set());
+  //     } catch (error) {
+  //         console.error('Error during delete operation:', error);
+  //     }
+  // };
 
   return (
     <div

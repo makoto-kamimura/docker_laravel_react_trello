@@ -13,6 +13,7 @@ return new class extends Migration {
             $table->date('due_date')->comment('タスクの期限日'); // 締切日
             // $table->date('due_date')->default(Carbon::now()->addDays(3))->change()->comment('タスクの期限日');
             $table->timestamp('completed_at')->nullable()->comment('タスクの完了日時'); // いつ完了したか
+            $table->integer('sort_order')->unique()->default(0)->comment('ソート順'); // ソート順を管理するカラム
             $table->timestamps(); // created_at & updated_at
         });
     }

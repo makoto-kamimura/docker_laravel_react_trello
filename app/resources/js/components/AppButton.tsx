@@ -4,7 +4,7 @@ import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import DoneIcon from '@mui/icons-material/Done';
 import AppsIcon from '@mui/icons-material/Apps';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { Column } from './types'; // 追加
+import { Column } from './types';
 
 interface AppButtonProps {
   isSelectionMode: boolean;
@@ -34,46 +34,34 @@ const AppButton: React.FC<AppButtonProps> = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [allSelected, setAllSelected] = useState(false);
 
-  const handleExpand = () => {
-    setIsExpanded(!isExpanded);
-    if (!isExpanded) {
+  const toggleExpandCollapse = () => {
+    setIsExpanded(prev => {
+      const newState = !prev;
       toggleSelectionMode();
-    }
-  };
-
-  const handleCollapse = () => {
-    setIsExpanded(false);
-    toggleSelectionMode();
+      return newState;
+    });
   };
 
   const handleSelectAll = () => {
     if (allSelected) {
-      // すべてのタスクとステータスを選択解除
       deselectAllItems();
     } else {
-      // すべてのタスクとステータスを選択
       const allTaskIds = new Set<string>();
       const allStatusIds = new Set<string>();
   
-      // 各カラムのタスクとステータスを収集
       Object.keys(columns).forEach(columnId => {
         allStatusIds.add(columnId);
         columns[columnId].items.forEach(task => {
           allTaskIds.add(task.id);
         });
       });
-  
-      // 選択されたタスクとステータスを更新
-      setSelectedTasks(allTaskIds);
-      setSelectedStatuses(allStatusIds);
+
     }
-    // 選択状態を反転
     setAllSelected(!allSelected);
   };
 
   const deleteSelectedItems = async () => {
     try {
-      // タスク削除処理
       await Promise.all(
         Array.from(selectedTasks).map(taskId =>
           fetch(`/api/tasks/${taskId}`, { method: 'DELETE' })
@@ -81,7 +69,6 @@ const AppButton: React.FC<AppButtonProps> = ({
         )
       );
 
-      // ステータス削除処理
       await Promise.all(
         Array.from(selectedStatuses).map(statusId =>
           fetch(`/api/statuses/${statusId}`, { method: 'DELETE' })
@@ -89,16 +76,13 @@ const AppButton: React.FC<AppButtonProps> = ({
         )
       );
 
-      // UI更新
       setColumns(prevColumns => {
         const newColumns = { ...prevColumns };
 
-        // 選択されたタスクを削除
         Object.keys(newColumns).forEach(columnId => {
           newColumns[columnId].items = newColumns[columnId].items.filter(task => !selectedTasks.has(task.id));
         });
 
-        // 選択されたステータスを削除
         selectedStatuses.forEach(statusId => {
           delete newColumns[statusId];
         });
@@ -106,7 +90,6 @@ const AppButton: React.FC<AppButtonProps> = ({
         return newColumns;
       });
 
-      // 選択モード終了
       setSelectedTasks(new Set());
       setSelectedStatuses(new Set());
     } catch (error) {
@@ -116,7 +99,6 @@ const AppButton: React.FC<AppButtonProps> = ({
 
   const completeSelectedItems = async () => {
     try {
-      // タスク完了処理
       await Promise.all(
         Array.from(selectedTasks).map(taskId =>
           fetch(`/api/tasks/${taskId}/complete`, { method: 'PATCH' })
@@ -124,11 +106,9 @@ const AppButton: React.FC<AppButtonProps> = ({
         )
       );
 
-      // UI更新
       setColumns(prevColumns => {
         const newColumns = { ...prevColumns };
 
-        // 選択されたタスクを完了
         Object.keys(newColumns).forEach(columnId => {
           newColumns[columnId].items = newColumns[columnId].items.map(task =>
             selectedTasks.has(task.id) ? { ...task, completed_at: new Date().toISOString() } : task
@@ -138,7 +118,6 @@ const AppButton: React.FC<AppButtonProps> = ({
         return newColumns;
       });
 
-      // 選択モード終了
       setSelectedTasks(new Set());
       setSelectedStatuses(new Set());
     } catch (error) {
@@ -149,7 +128,7 @@ const AppButton: React.FC<AppButtonProps> = ({
   return (
     <div style={{ position: 'fixed', bottom: '20px', right: '20px', display: 'flex', gap: '10px' }}>
       {!isExpanded && (
-        <button onClick={handleExpand} style={{
+        <button onClick={toggleExpandCollapse} style={{
           padding: "10px",
           borderRadius: "50%",
           backgroundColor: "#007BFF",
@@ -165,7 +144,7 @@ const AppButton: React.FC<AppButtonProps> = ({
       )}
       {isExpanded && (
         <>
-          <button onClick={handleCollapse} style={{
+          <button onClick={toggleExpandCollapse} style={{
             padding: "10px",
             borderRadius: "50%",
             backgroundColor: "#007BFF",

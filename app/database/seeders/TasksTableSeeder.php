@@ -16,6 +16,7 @@ class TasksTableSeeder extends Seeder
                 'description' => 'タスク 1 の詳細情報',
                 'due_date' => now()->addDays(7)->format('Y-m-d'), // 🔹 7日後の期限
                 'completed_at' => null, // 🔹 未完了なので NULL
+                'sort_order' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -25,6 +26,7 @@ class TasksTableSeeder extends Seeder
                 'description' => 'タスク 2 の詳細情報',
                 'due_date' => now()->addDays(3)->format('Y-m-d'), // 🔹 3日後の期限
                 'completed_at' => now()->subDay()->format('Y-m-d H:i:s'), // 🔹 昨日完了した
+                'sort_order' => 2,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -34,6 +36,7 @@ class TasksTableSeeder extends Seeder
                 'description' => 'タスク 3 の詳細情報',
                 'due_date' => now()->addDays(14)->format('Y-m-d'), // 🔹 14日後の期限
                 'completed_at' => null, // 🔹 未完了
+                'sort_order' => 3,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],

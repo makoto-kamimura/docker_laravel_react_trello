@@ -125,14 +125,19 @@ docker_laravel_react_trello
 docker compose up -d
 ```
 
-* 単体テスト準備
+* ビルド
+```
+docker exec -it docker_laravel_react_trello-app-1 bash
+npm run production
+```
+
+* テストデータ準備
 ```
 docker exec -it docker_laravel_react_trello-app-1 bash
 php artisan tinker
-Artisan::call('db:seed', ['--class' => 'Database\\Seeders\\StatusesTableSeeder']);
 \App\Models\Task::factory()->count(50)->create();
-Shift + G
-Ctrl + C
+"Ctrl + C"
+
 ```
 
 * 50件実行テスト(実行後DBリセット)

@@ -10,6 +10,7 @@ return new class extends Migration {
         Schema::create('statuses', function (Blueprint $table) {
             $table->id()->comment('ステータスID'); // 主キー
             $table->string('name')->unique()->comment('ステータス名'); // ユニークなステータス名
+            $table->integer('sort_order')->unique()->default(0)->comment('ソート順'); // ソート順を管理するカラム
             $table->timestamps(); // created_at & updated_at
         });
     }
